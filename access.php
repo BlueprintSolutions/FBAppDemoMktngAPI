@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
-include __DIR__ . '/inc/config.inc';
+require_once __DIR__ . '/inc/global.inc.php';
 
 use Facebook\Facebook;
 use Facebook\Exceptions\FacebookResponseException;
@@ -8,7 +7,6 @@ use Facebook\Exceptions\FacebookSDKException;
 
 // Init PHP Sessions
 session_start();
-$_SESSION['config'] = config();
 
 $fb = new Facebook([
   'app_id' => $_SESSION['config']['app_id'],
@@ -19,7 +17,8 @@ $fb = new Facebook([
 $helper = $fb->getRedirectLoginHelper();
 
 if (!isset($_SESSION['facebook_access_token'])) {
-  $_SESSION['facebook_access_token'] = null;
+	$_SESSION['facebook_access_token'] = null;
+	$_SESSION['config'] = config();
 }
 
 if (!$_SESSION['facebook_access_token']) {
@@ -38,7 +37,8 @@ if (!$_SESSION['facebook_access_token']) {
 }
 
 if ($_SESSION['facebook_access_token']) {
-  echo "You are logged in!";
+	echo "You are logged in!";
+	header("Location: index.php");
 } else {
   $permissions = ['ads_management', 'ads_read', 'manage_pages', 'read_insights'];
   $loginUrl = $helper->getLoginUrl($_SESSION['config']['login_url'], $permissions);
