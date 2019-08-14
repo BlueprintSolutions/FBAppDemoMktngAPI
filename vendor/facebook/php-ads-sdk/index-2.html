@@ -1,0 +1,182 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Unknown </title></head><body>
+<h1 id="facebook-ads-api-sdk-for-php">Facebook Ads API SDK for PHP</h1>
+<p><a href="https://packagist.org/packages/facebook/php-ads-sdk"><img alt="Packagist" src="https://img.shields.io/packagist/v/facebook/php-ads-sdk.svg?style=flat-square" /></a>
+<a href="https://github.com/facebook/facebook-php-ads-sdk/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Facebook%20Platform-blue.svg?style=flat-square" /></a>
+<a href="https://travis-ci.org/facebook/facebook-php-ads-sdk"><img alt="Travis" src="https://img.shields.io/travis/facebook/facebook-php-ads-sdk.svg?style=flat-square" /></a>
+<a href="https://scrutinizer-ci.com/g/facebook/facebook-php-ads-sdk"><img alt="Scrutinizer" src="https://img.shields.io/scrutinizer/g/facebook/facebook-php-ads-sdk.svg?style=flat-square" /></a>
+<a href="https://scrutinizer-ci.com/g/facebook/facebook-php-ads-sdk"><img alt="Scrutinizer Coverage" src="https://img.shields.io/scrutinizer/coverage/g/facebook/facebook-php-ads-sdk.svg?style=flat-square" /></a></p>
+<p>This Ads API SDK is built to facilitate application development for <a href="https://developers.facebook.com/docs/ads-api">Facebook Ads API</a>.</p>
+<h2 id="installation">Installation</h2>
+<p>The Facebook Ads API SDK requires PHP 5.4 or greater.</p>
+<h3 id="composer">Composer</h3>
+<p>Facebook Ads API SDK uses composer to manage dependencies. You can follow this <a href="https://getcomposer.org/download/">document</a> to install composer.</p>
+<p>Add the following to your <code>composer.json</code> file:</p>
+<p><code>json
+{
+    "require": {
+        "facebook/php-ads-sdk": "2.8.*"
+    }
+}</code>
+then install it through composer:</p>
+<p><code>shell
+php composer.phar install --no-dev</code></p>
+<p>This SDK and its dependencies will be installed under <code>./vendor</code>.</p>
+<h3 id="alternatives">Alternatives</h3>
+<p>This repository is written following the <a href="http://www.php-fig.org/psr/psr-4/">psr-4 autoloading standard</a>. Any psr-4 compatible autoloader can be used.</p>
+<h2 id="usage">Usage</h2>
+<h3 id="api-main-class">Api main class</h3>
+<p>The <code>FacebookAds\Api</code> object is the foundation of the Ads SDK which encapsulates a <code>FacebookAds\Session</code> and is used to execute requests against the Graph API.</p>
+<p>To instantiate an Api object you will need a valid access token:
+```php
+use FacebookAds\Api;</p>
+<p>// Initialize a new Session and instanciate an Api object
+Api::init($app_id, $app_secret, $access_token);</p>
+<p>// The Api object is now available trough singleton
+$api = Api::instance();</p>
+<p>```</p>
+<p>Once instantiated, the Api object will allow you to start making requests to the Ads API.</p>
+<h3 id="fields-names">Fields names</h3>
+<p>Due to the high number of field names in the Ads API existing objects, in order to facilitate your code maintainability, enum-like classes are provided.
+These files are stored under the <code>FacebookAds/Object/Fields</code> directory.
+You can access object properties in the same manner you would usually do in php:</p>
+<p>```php
+use FacebookAds\Object\AdAccount;</p>
+<p>$account = new AdAccount();
+$account-&gt;name = 'My account name';
+echo $account-&gt;name;
+```</p>
+<p>or using the enums:</p>
+<p>```php
+use FacebookAds\Object\AdAccount;
+use FacebookAds\Object\Fields\AdAccountFields;</p>
+<p>$account = new AdAccount();
+$account-&gt;{AdAccountFields::NAME} = 'My account name';
+echo $account-&gt;{AdAccountFields::NAME};
+```</p>
+<h3 id="object-classes">Object classes</h3>
+<p>Facebook Ads entities are defined as classes under the <code>FacebookAds/Object</code> directory. </p>
+<h4 id="read-objects">Read Objects</h4>
+<p>```php
+use FacebookAds\Object\AdAccount;</p>
+<p>$account = new AdAccount($account_id);
+$account-&gt;read();
+```</p>
+<p>For some objects, the Ads API doesn't return all available fields by default. The first argument of the object's read method is an array of field names to be requested.</p>
+<p>```php
+use FacebookAds\Object\AdAccount;
+use FacebookAds\Object\Fields\AdAccountFields;</p>
+<p>$fields = array(
+  AdAccountFields::ID,
+  AdAccountFields::NAME,
+  AdAccountFields::DAILY_SPEND_LIMIT,
+);</p>
+<p>$account = new AdAccount($account_id);
+$account-&gt;read($fields);
+```
+Requesting an high number of fields may cause the response time to visibly increase, you should always request only the fields you really need.</p>
+<h4 id="create-objects">Create Objects</h4>
+<p>```php
+use FacebookAds\Object\AdSet;
+use FacebookAds\Object\Fields\AdSetFields;</p>
+<p>$account_id = 'act_123123';
+$campaign_id = '123456';</p>
+<p>$set = new AdSet(null, $account_id);
+$set-&gt;setData(array(
+  AdSetFields::NAME =&gt; 'My Test AdSet',
+  AdSetFields::CAMPAIGN_ID =&gt; $campaign_id,
+  AdSetFields::DAILY_BUDGET =&gt; 150,
+  AdSetFields::START_TIME =&gt; (new \DateTime("+1 week"))-&gt;format(\DateTime::ISO8601),
+  AdSetFields::END_TIME =&gt; (new \DateTime("+2 week"))-&gt;format(\DateTime::ISO8601),
+));
+$set-&gt;create(array(
+  AdSet::STATUS_PARAM_NAME =&gt; AdSet::STATUS_PAUSED,
+));
+echo $set-&gt;id;
+```</p>
+<h4 id="update-objects">Update Objects</h4>
+<p>```php
+use FacebookAds\Object\AdSet;
+use FacebookAds\Object\Fields\AdSetFields;</p>
+<p>$ad_set_id = '123456';</p>
+<p>$set = new AdSet($ad_set_id);
+$set-&gt;{AdSetFields::NAME} = 'My new AdSet name';
+$set-&gt;update();
+```</p>
+<h4 id="delete-objects">Delete Objects</h4>
+<p>```php
+use FacebookAds\Object\AdSet;</p>
+<p>$ad_set_id = '123456';</p>
+<p>$set = new AdSet($ad_set_id);
+$set-&gt;delete();
+```</p>
+<h3 id="cursors">Cursors</h3>
+<p>Since the release of the Facebook Graph API 2.0, pagination is handled through <a href="https://developers.facebook.com/docs/graph-api/using-graph-api/v2.2#paging">cursors</a>.
+Here cursors are defined as in <code>\FacebookAds\Cursor</code>. Cursors are generally returned from connection methods:</p>
+<p>```php
+use FacebookAds\Object\AdAccount;
+use FacebookAds\Object\Fields\CampaignFields;</p>
+<p>$account = new AdAccount('<ACT_ID>');
+$cursor = $account-&gt;getCampaigns();</p>
+<p>// Loop over objects
+foreach ($cursor as $campaign) {
+  echo $campaign-&gt;{CampaignFields::NAME}.PHP_EOL;
+}</p>
+<p>// Access objects by index
+if ($cursor-&gt;count() &gt; 0) {
+  echo "The first campaign in the cursor is: ".$cursor[0]-&gt;{CampaignFields::NAME}.PHP_EOL;
+}</p>
+<p>// Fetch the next page
+$cursor-&gt;fetchAfter();
+// New Objects will be appended to the cursor
+```</p>
+<h4 id="implicit-fetching">Implicit Fetching</h4>
+<p>Whenever all object connected to a parent are required (carelessly from the number of HTTP requests) implicit fetching can help reducing the amount of code required.
+If cursor has Implicit Fetching enabled, while iterating (foreach, Cursor::next(), Cursor::prev()) the page end is reached, the SDK will automatically fetch and append a new page, untill cursor end.
+Implicit Fetching will make you lose controll of the number of HTTP request that will be sent and, for this reason, is disabled by default.
+Implicit Fetching can be enabled for a specific cursor:</p>
+<p><code>php
+$cursor-&gt;setUseImplicitFetch(true);</code></p>
+<p>Or globally:</p>
+<p>```php
+use FacebookAds\Cursor;</p>
+<p>Cursor::setDefaultUseImplicitFetch(true);
+```</p>
+<h4 id="reverse-iterations">Reverse Iterations</h4>
+<p>Cursors are bi-directional, and can be iterated in reverse order:</p>
+<p>```php
+use FacebookAds\Object\AbstractCrudObject;</p>
+<p>/*<em> @var \FacebookAds\Cursor $cursor </em>/
+$cursor-&gt;setUseImplicitFetch(true);</p>
+<p>$cursor-&gt;end();
+while ($cursor-&gt;valid()) {
+  echo $cursor-&gt;current()-&gt;{AbstractCrudObject::FIELD_ID}.PHP_EOL;
+  $cursor-&gt;prev();
+}</p>
+<p>```</p>
+<h2 id="tests">Tests</h2>
+<p>The 'test' folder contains the test cases. These are logically divided in unit and integration tests.
+Integration tests require an active Facebook Ad Account, a Facebook Application and a valid Access Token.</p>
+<p>Note: we are currently unable to securely and reliably run integration tests on a public CI system. Our integrations with Travis and Scrutinizer (including badges at the top of this file) include only unit tests.</p>
+<h3 id="install-dependencies">Install dependencies</h3>
+<p>From the root folder run:</p>
+<p><code>shell
+php composer.phar install --dev</code></p>
+<h3 id="execute-unit-tests-only">Execute unit tests only</h3>
+<p><code>shell
+./vendor/bin/phpunit -c test/phpunit-travis.xml</code></p>
+<p>To run tests individually (be sure not to be pointing to an integration test file):</p>
+<p><code>shell
+./vendor/bin/phpunit -c test/phpunit-travis.xml path/to/class/file</code></p>
+<h3 id="execute-all-tests-unit-integration">Execute all tests (unit + integration)</h3>
+<p>Setup your integration config:</p>
+<p>1 - Copy the config file template.</p>
+<p><code>shell
+cp test/config.php.dist test/config.php</code></p>
+<p>2 - Edit <code>test/config.php</code> with your informations.</p>
+<p>Execute:</p>
+<p><code>shell
+./vendor/bin/phpunit -c test/</code></p>
+<p>To run tests individually:</p>
+<p><code>shell
+./vendor/bin/phpunit -c test/ path/to/class/file</code></p>
+</body></html>

@@ -1,0 +1,345 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Unknown </title></head><body>
+<h1 id="facebook-ads-sdk-developer-guide">Facebook Ads SDK - Developer Guide</h1>
+<h2 id="introduction">Introduction</h2>
+<p>This guide assumes you have an app that has been whitelisted for the Facebook Ads API, that you have a fully working development environment with all required dependencies and that are ready to start coding. If you haven't done this, please see the <a href="./README.md">README</a> file.</p>
+<p>We also assume you are somewhat familiar with namespaces in PHP. If not, we recommend you take some time to read the <a href="http://www.php.net/manual/en/language.namespaces.basics.php">namespace basics</a> in the PHP Manual. </p>
+<p>You should also have the documentation for the <a href="https://developers.facebook.com/docs/ads-api">Facebook Marketing APIs</a> available as you will need to refer to this to understand which combination of parameters are required for the different object types.</p>
+<h2 id="bootstrapping">Bootstrapping <a name="bootstrapping"></a></h2>
+<p>The classes within the Facebook Ads SDK are designed to be included using an autoloader compliant with the <a href="http://www.php-fig.org/psr/psr-4/">PSR-4</a>. If you are using <a href="https://getcomposer.org/">Composer</a> to include dependencies, you will find an implementation available within the vendor folder. This guide assumes you are using this autoloader.</p>
+<p><code>php
+&lt;?php
+define('VENDOR_DIR', '/path/to/sdk/'); // Path to the Vendor directory 
+$loader = include VENDOR_DIR.'/vendor/autoload.php';</code></p>
+<h3 id="authentication">Authentication <a name="authentication"></a></h3>
+<p>To make any request to the Ads API, you will need to have a valid access token and the user has accepted the <code>ads_management</code> permission.</p>
+<h2 id="the-api-object">The Api Object</h2>
+<p>The <code>FacebookAds\Api</code> object is the basis of the Ads SDK which encapsulates a <code>FacebookAds\Session</code> and is used to execute requests against the Graph API.</p>
+<p>An easy to use init method is provided:</p>
+<p>```php
+use FacebookAds\Api;</p>
+<p>// Set the default application to be used with this session and register an instance of the Api object
+Api::init('<APP_ID>', '<APP_SECRET>', '<ACCESS_TOKEN>');</p>
+<p>// The instace is now retrivable
+$api = Api::instance();
+```</p>
+<h3 id="making-requests-to-the-graph">Making requests to the Graph <a name="making_requests"></a></h3>
+<p>Generally you should not need to make requests to the Graph API directly as these calls are handled by the implementation of objects within the SDK. However, there may be some case where you do want to query the Graph directly. In this case, you can use the <code>call</code> method of the <code>Api</code> class which returns a <code>FacebookAds\Http\RequestInterface</code>, by default the registered class is <code>FacebookAds\Http\Request</code>:</p>
+<p><code>php
+$response = $api-&gt;call(
+  '/61405622', 
+  Api::HTTP_METHOD_GET, 
+  array('fields'=&gt;'name')
+);
+var_dump($response-&gt;getContent());</code></p>
+<h3 id="handling-multiple-access-tokens">Handling Multiple Access Tokens <a name="multiple_tokens"></a></h3>
+<p>The first time an <code>Api</code> object is instantiated, we store a static reference to that object within the <code>Api</code> class and this is used as the default instance within the SDK. This saves you from having to pass around a reference to an <code>Api</code> instance within your application.</p>
+<p>A common requirement amongst Facebook Ads API developers however is to be able to handle multiple sessions within a single script execution. For example, you may have a process which syncs updated objects for multiple app users into some local datastore. </p>
+<p>To enable this, we provide two ways to manage sessions. </p>
+<p>The first is by mutating the default instance used by the application. The default instance can be accessed using the method <code>Api::instance()</code>. You can also change the default instance using the static method <code>Api::setInstance($api)</code>.</p>
+<p>The second is to explicitly define the <code>Api</code> instance you want to use when querying the Graph. This is achieved by passing an instance to the constructor of any class that extends from <code>Object\AbstractCrudObject</code>.</p>
+<p><code>php
+use FacebookAds\Object\Ad;
+$my_ad = new Ad($id, $parent_id=null, $api);</code></p>
+<h2 id="objects-types">Objects Types</h2>
+<h3 id="crud-objects">CRUD Objects</h3>
+<p>For any entity that can be directly queried from the Graph API we have provided classes which extend <code>Object\AbstractCrudObject</code>. This provides <code>create</code>, <code>read</code>, <code>update</code> and <code>delete</code> methods for the majority of these entities. However, in some cases the Graph API does not support all of these operations and you will receive an <code>\Exception</code> if you attempt to call an unsupported method.</p>
+<p>When setting class variables on an object of this type we perform some basic validation to ensure the field is a valid field and an <code>\Exception</code> will be thrown if a field name is not found within the <a href="#field_definition">field definition</a> for that class. </p>
+<h3 id="simple-objects">Simple Objects</h3>
+<p>There is another set of entities which cannot be directly queried from the Graph such as an <code>AdPreview</code>. This type of object extends <code>Object\AbstractObject</code> which provides methods to access the response data. </p>
+<h3 id="field-definitions">Field definitions <a name="field_definition"></a></h3>
+<p>For each object type, we provide a class enumerating the available fields of that object. These can be found within the <code>FacebookAds\Object\Fields</code> namespace and provide a way to reference fields without using strings. You can alternatively use strings if you find this easier. </p>
+<p>For example, you can set the data of an object using the field definitions in the following way:</p>
+<p><code>php
+$someObject-&gt;setData(array(
+  MyObjectFields::ID =&gt; 1234,
+  MyObjectFields::NAME =&gt; 'My Name',
+));</code></p>
+<p>Alternatively, you can use the string equivalent:</p>
+<p><code>php
+$someObject-&gt;setData(array(
+  'id'=&gt;1234,
+  'name'=&gt;'My Name',
+));</code></p>
+<p>Similarly the same applies for direct assignation:</p>
+<p>```php
+//Using field definitions:
+$someObject-&gt;{SomeObjectFields::ID} = 123;</p>
+<p>//Equivalent to using the variable name directly:
+$someObject-&gt;id = 123;
+```</p>
+<h3 id="the-cursor-class">The Cursor Class</h3>
+<p>When requesting multiple objects from the Graph, responses may be returned in pages of data which can be traversed using cursors. We encapsulate this information into a <code>Cursor</code> class which represents the set of objects in the current page along with information about how to access subsequent pages of objects. This class implements the <code>\Iterable</code> and <code>\Countable</code> interfaces.  </p>
+<h2 id="reading-objects">Reading Objects</h2>
+<h3 id="reading-a-single-object">Reading a single object</h3>
+<p>To read an object from the Graph you will need its <code>id</code>. By default, only the <code>id</code> field of an object is queried and you should specify when reading an object the fields you need. It is not recommended that you request all fields unless you require them all. </p>
+<p>```php
+use FacebookAds\Object\AdAccount;
+use FacebookAds\Object\Fields\AdAccountFields;</p>
+<p>$required_fields = array(
+  AdAccountFields::ID,
+  AdAccountFields::NAME,
+  AdAccountFields::DAILY_SPEND_LIMIT,<br />
+);</p>
+<p>$adaccount = (new AdAccount($id))-&gt;read($required_fields);
+```
+See <a href="#default_fields">Defining Default Fields</a> within the section about Extending the SDK for an example of how to avoid defining the fields you require every request.</p>
+<h3 id="reading-multiple-objects">Reading multiple objects</h3>
+<p>We provide the static method <code>readIds($ids = array(...), $fields = array(...))</code> to enable you to request many objects of a single type and will return a <code>Cursor</code>:</p>
+<p>```php
+use FacebookAds\Object\AdAccount;
+use FacebookAds\Object\Fields\AdAccountFields;</p>
+<p>$required_fields = array(
+  AdAccountFields::ID,
+  AdAccountFields::NAME,
+  AdAccountFields::DAILY_SPEND_LIMIT,<br />
+);
+$account_ids = array('act_x', 'act_y'...)
+$adaccounts = AdAccount::readIds($account_ids, $required_fields);
+foreach($adaccounts as $account) {
+    echo $account-&gt;id."\n";
+}
+```</p>
+<h2 id="creating-objects">Creating Objects</h2>
+<p>When creating objects on the Graph, they are generally created by making a POST request to an edge of a parent object. For example, ads are created using the endpoint <code>https://graph.facebook.com/act_123123/ads</code>. Therefore when creating an object, you must know the <code>id</code> of the parent object which is generally the id of an AdAccount. You should consult the <a href="https://developers.facebook.com/docs/ads-api">Facebook Developer Documentation</a> to see which parent object to use.</p>
+<p>```php
+use FacebookAds\Object\Ad;
+use FacebookAds\Object\Fields\AdFields;</p>
+<p>$account_id = 'act_123123';
+$ad = new Ad($id=null, $account_id);</p>
+<p>$ad-&gt;setData(array(
+  AdFields::NAME =&gt; 'My Test Ad',
+  AdFields::ADSET_ID =&gt; $adset_id,
+));</p>
+<p>$ad-&gt;create(array(
+  Ad::STATUS_PARAM_NAME =&gt; Ad::STATUS_PAUSED,
+));
+echo $ad-&gt;{AdFields::ID};
+```</p>
+<h2 id="updating-objects">Updating Objects</h2>
+<p>When you mutate an AdObject, we record which variables have changed and make it easy for you to write these change to the Graph API by calling the <code>update</code> method. </p>
+<p>Please note that in some cases the variable name used to update an attribute of an entity differs from the one read from Graph API. Any variable you change will be included in the request to update an object an you will likely receive an <code>\Exception</code> if the field name is incorrect. Please consult the <a href="https://developers.facebook.com/docs/ads-api">Facebook Developer Documentation</a> to see which fields are required. </p>
+<p>```php
+use FacebookAds\Object\Ad;
+use FacebookAds\Object\Fields\AdFields;</p>
+<p>$ad = new Ad($id);
+$ad-&gt;name = 'Updated Name';
+$ad-&gt;update();
+```</p>
+<h2 id="deleting-objects">Deleting Objects</h2>
+<h3 id="deleting-a-single-object">Deleting a single object</h3>
+<p>To delete an object, you only need call the <code>delete</code> method on an instance of that object. Note, you do not have had to have read the object from the Graph API, all you need is the <code>id</code> of the object.</p>
+<p>```php
+use FacebookAds\Object\Ad;
+use FacebookAds\Object\Fields\AdFields;</p>
+<p>$ad = new Ad($id);
+$ad-&gt;delete();
+```</p>
+<h3 id="deleting-multiple-objects">Deleting multiple objects</h3>
+<p>We provide the static method <code>deleteIds($ids = array(...))</code> to enable you to delete many objects at the same time. This method returns a boolean value and will only return <code>true</code> if all objects were successfully deleted. A return value of <code>false</code> means one or more failed to be deleted. Please also note that we do not verify the type of the <code>id</code> you have passed into this function.</p>
+<p><code>php
+use FacebookAds\Object\Ad;
+$status = Ad::deleteIds($ids = array(...));</code></p>
+<h3 id="save-helper">Save Helper</h3>
+<p>On object that extends <code>AbstractCrudObject</code> you can call the <code>save</code> method which will call <code>create</code> if the object does not have a value for <code>id</code> set, or will call <code>update</code> a value is present. </p>
+<h2 id="connections">Connections</h2>
+<p>Objects on the Graph API may also have connections. A connection provides a way to retrieve objects which relate to the current object, for example, you can retrieve all the ads relative to an ad account using the URL <code>https://graph.facebook.com/act_123123/ads</code>.</p>
+<p>For each connection an object has, we provide a helper method to retrieve its related objects. In the case of <code>ObjectObject\AdAccount</code> we provide several of these methods including <code>getAds($required_fields)</code> which will return a <code>Cursor</code> containing a page of <code>Object\Ad</code> objects.</p>
+<p><code>php
+use FacebookAds\Object\AdAccount;
+$account = new AdAccount($id);
+$ads = $account-&gt;getAds($fields = array('name')));
+foreach($ads as $ad) {
+  echo $ad-&gt;name."\n";
+}</code></p>
+<p>You only need the <code>id</code> of the object on which you want to call a connection method, therefore you do not need to have read the object from the Graph API first. </p>
+<p>For cases where these helper methods are not available, see <a href="#generic_connections">Requesting Connections Without Helper Methods</a>.</p>
+<h2 id="targeting">Targeting <a name="targeting"></a></h2>
+<p>Facebook's targeting can generally be broken down into <a href="https://developers.facebook.com/docs/reference/ads-api/interest-targeting">interests</a>, <a href="https://developers.facebook.com/docs/reference/ads-api/demographic-targeting">demographics</a>, <a href="https://developers.facebook.com/docs/reference/ads-api/behavior-targeting">behaviors</a> and <a href="https://developers.facebook.com/docs/reference/ads-api/targeting-specs/#location">geo targeting</a>. Many of these need to be queried from the Graph API search endpoint.</p>
+<p>To query targeting using the Ads SDK, you can use the <code>Object\TargetingSearch</code> class.</p>
+<h2 id="examples">Examples</h2>
+<p>This set of examples will walk you through:</p>
+<ol>
+<li>Reading AdAccounts for a user</li>
+<li>Creating a Campaign</li>
+<li>Searching targeting criteria</li>
+<li>Creating an AdSet</li>
+<li>Creating an AdImage</li>
+<li>Creating an AdCreative</li>
+<li>Creating an Ad</li>
+</ol>
+<p>Examples can be found within the <code>examples/</code> folder of the SDK. This assumes you have bootstrap code with an access token:</p>
+<p>```php
+&lt;?php
+define('SDK_DIR', '/path/to/sdk/'); // Path to the SDK directory </p>
+<p>$loader = include SDK_DIR.'/vendor/autoload.php';</p>
+<p>use FacebookAds\Api;</p>
+<p>Api::init($app_id, $app_secret, $access_token);</p>
+<p>```</p>
+<h3 id="1-reading-adaccounts">1. Reading AdAccounts</h3>
+<p>The <code>FacebookSession</code> contains the <code>id</code> of the user who has the active session and this can be used to read their <code>AdAccount</code> connections. </p>
+<p>```php
+use FacebookAds\Object\AdUser;
+use FacebookAds\Object\Fields\AdUserFields;
+use FacebookAds\Object\AdAccount;
+use FacebookAds\Object\Fields\AdAccountFields;</p>
+<p>$user = new AdUser('me');
+$user-&gt;read(array(AdUserFields::ID));</p>
+<p>$accounts = $user-&gt;getAdAccounts(array(
+  AdAccountFields::ID,
+  AdAccountFields::NAME,
+));</p>
+<p>// Print out the accounts
+echo "Accounts:\n";
+foreach($accounts as $account) {
+  echo $account-&gt;id . ' - ' .$account-&gt;name."\n";
+}</p>
+<p>// Grab the first account for next steps (you should probably choose one)
+$account = (count($accounts)) ? $accounts-&gt;getObjects()[0] : null;
+echo "\nUsing this account: ";
+echo $account-&gt;id."\n";
+```</p>
+<h3 id="2-creating-a-campaign">2. Creating a Campaign</h3>
+<p>Now we have an <code>AdAccount</code> for the current user we can go ahead an create our <a href="https://developers.facebook.com/docs/reference/ads-api/adcampaign">Campaign</a>. All <code>ads</code> within your <code>campaign</code> should have the same objective. You can find the available objectives within the <a href="src/FacebookAds/Object/Values/AdObjectives.php"><code>AdObjectives</code></a> class.</p>
+<p>In the following example we create a paused campaign so your ads do not go live, however you can omit the status field if you want your ad to run. </p>
+<p>```php
+use FacebookAds\Object\Campaign;
+use FacebookAds\Object\Fields\CampaignFields;
+use FacebookAds\Object\Values\AdObjectives;
+use FacebookAds\Object\Values\AdBuyingTypes;</p>
+<p>$campaign  = new Campaign(null, $account-&gt;id);
+$campaign-&gt;setData(array(
+  CampaignFields::NAME =&gt; 'My First Campaign',
+  CampaignFields::OBJECTIVE =&gt; AdObjectives::LINK_CLICKS,
+));</p>
+<p>$campaign-&gt;create(array(
+  Campaign::STATUS_PARAM_NAME =&gt; Campaign::STATUS_PAUSED,
+));
+echo "Campaign ID:".$campaign-&gt;id."\n";
+```</p>
+<h3 id="3-searching-targeting">3. Searching Targeting</h3>
+<p>The final thing we need before creating an <code>Ad</code> is some targeting. Many attributes of targeting can be found defined in the developer documentation, however some categories need you to search, such as interests. For this, we provide the <code>TargetingSearch</code> class.</p>
+<p>```php
+use FacebookAds\Object\TargetingSearch;
+use FacebookAds\Object\Search\TargetingSearchTypes;</p>
+<p>$results = TargetingSearch::search(
+  $type = TargetingSearchTypes::INTEREST,
+  $class = null,
+  $query = 'facebook london',
+);</p>
+<p>// we'll take the top result for now
+$target = (count($results)) ? $results-&gt;getObjects()[0] : null;
+echo "Using target: ".$target-&gt;name."\n";
+```</p>
+<p>Targeting for the moment is expressed in the form of a multidimensional array:</p>
+<p><code>php
+$targeting = array(
+  'geo_locations' =&gt; array(
+    'countries' =&gt; array('GB'),
+  ),
+  'interests' =&gt; array(
+    array(
+      'id' =&gt; $target-&gt;id,
+      'name'=&gt;$target-&gt;name,
+    ),
+  ),
+);</code></p>
+<h3 id="4-creating-an-adset">4. Creating an AdSet</h3>
+<p>An <a href="https://developers.facebook.com/docs/reference/ads-api/adset"><code>AdSet</code></a> is a set of <a href="https://developers.facebook.com/docs/reference/ads-api/adgroup"><code>Ad</code></a> objects and it is best practice to ensure all <code>Ad</code> objects within an <code>AdSet</code> have the same targeting.</p>
+<p>The <code>AdSet</code> holds the attributes about the duration of a campaign and the budget. When deciding a budget, you should also choose between <code>lifetime_budget</code> and <code>daily_budget</code>.</p>
+<p>```php
+use FacebookAds\Object\AdSet;
+use FacebookAds\Object\Fields\AdSetFields;
+use FacebookAds\Object\Values\BillingEvents;
+use FacebookAds\Object\Values\OptimizationGoals;</p>
+<p>$adset = new AdSet(null, $account-&gt;id);
+$adset-&gt;setData(array(
+  AdSetFields::NAME =&gt; 'My First AdSet',
+  AdSetFields::CAMPAIGN_ID =&gt; $campaign-&gt;id,
+  AdSetFields::DAILY_BUDGET =&gt; '150',
+  AdSetFields::OPTIMIZATION_GOAL =&gt; OptimizationGoals::REACH,
+  AdSetFields::BILLING_EVENT =&gt; BillingEvents::IMPRESSIONS,
+  AdSetFields::BID_AMOUNT =&gt; 2,
+  AdSetFields::TARGETING =&gt; $targeting,
+  AdSetFields::START_TIME =&gt; 
+    (new \DateTime("+1 week"))-&gt;format(\DateTime::ISO8601),
+  AdSetFields::END_TIME =&gt; 
+    (new \DateTime("+2 week"))-&gt;format(\DateTime::ISO8601),
+));</p>
+<p>$adset-&gt;create();
+echo 'AdSet  ID: '.$adset-&gt;id."\n";
+```</p>
+<h3 id="5-create-an-adimage">5. Create an AdImage</h3>
+<p>Now you have a <code>AdSet</code>, you will be able to create an <code>Ad</code>, however, first you will need to upload the image you want to use as part of the <code>AdCreative</code>.</p>
+<p>```php
+use FacebookAds\Object\AdImage;
+use FacebookAds\Object\Fields\AdImageFields;</p>
+<p>$image = new AdImage(null, $account-&gt;id);
+$image-&gt;filename = SDK_DIR.'/test/misc/FB-f-Logo__blue_512.png';</p>
+<p>$image-&gt;create();
+echo 'Image Hash: '.$image-&gt;hash."\n";
+```</p>
+<h3 id="6-creating-an-adcreative">6. Creating an AdCreative</h3>
+<p>You can create an <code>AdCreative</code> in two ways. The first is by including a JSON object when creating an <code>Ad</code> and the second, which we will demonstrate here, is by explicitly creation an <code>AdCreative</code> and using its <code>id</code> when creating an <code>Ad</code>.</p>
+<p>```php
+use FacebookAds\Object\AdCreative;
+use FacebookAds\Object\Fields\AdCreativeFields;</p>
+<p>$creative = new AdCreative(null, $account-&gt;id);
+$creative-&gt;setData(array(
+  AdCreativeFields::NAME =&gt; 'Sample Creative',
+  AdCreativeFields::TITLE =&gt; 'Welcome to the Jungle',
+  AdCreativeFields::BODY =&gt; 'We\'ve got fun \'n\' games',
+  AdCreativeFields::IMAGE_HASH =&gt; $image-&gt;hash,
+  AdCreativeFields::OBJECT_URL =&gt; 'http://www.example.com/',
+));</p>
+<p>$creative-&gt;create();
+echo 'Creative ID: '.$creative-&gt;id . "\n";
+```</p>
+<h3 id="7-creating-an-ad">7. Creating an Ad</h3>
+<p>The final step is to create the <a href="https://developers.facebook.com/docs/reference/ads-api/adgroup/"><code>Ad</code></a>. The <code>Ad</code> contains all of the information about bid, creative and targeting. It should also have the asme objective as the <code>Campaign</code> we created.</p>
+<p>```php
+use FacebookAds\Object\Ad;
+use FacebookAds\Object\Fields\AdFields;</p>
+<p>$ad = new Ad(null, $account-&gt;id);
+$ad-&gt;setData(array(
+  AdFields::CREATIVE =&gt; array('creative_id' =&gt; $creative-&gt;id),
+  AdFields::NAME =&gt; 'My First Ad',
+  AdFields::ADSET_ID =&gt; $adset-&gt;id,
+));</p>
+<p>$ad-&gt;create();
+echo 'Ad ID:'.$ad-&gt;id."\n";
+```</p>
+<h2 id="extending-the-sdk">Extending the SDK</h2>
+<p>There are many scenarios in which you may want to extend the SDK, and when developing this SDK we attempted to balance extensibility with ease of use for new developers.</p>
+<h3 id="defining-default-fields-to-read">Defining Default Fields to Read <a name="default_fields"></a></h3>
+<p>We noted earlier that by default no fields are requested when calling the <code>read</code> method of a class implementing <code>AbstractCrudObject</code>, however if you always require the same set of fields throughout your application we have provided a simple way to do this.</p>
+<p>Within your own namespace, you can extend the any class implementing <code>AbstractCrudObject</code> and override the static variable <code>$defaultReadFields</code> to be an array of fields you want to be read by default. You should try to not change the classes in the SDK directly as this may break forward compatibly.</p>
+<p>```php
+namespace MyNamespace\Object;</p>
+<p>use FacebookAds\Object\Fields\AdAccountFields;</p>
+<p>class AdAccount extends FacebookAds\Object\AdAccount {</p>
+<p>protected static $defaultReadFields = array(
+    AdAccountFields::ID,
+    AdAccountFields::NAME,
+    AdAccountFields::DAILY_SPEND_LIMIT,
+    AdAccountFields::CURRENCY,
+  );
+}
+```</p>
+<p>Within your application, whenever you use an <code>AdAccount</code>, you should use the one within your namespace instead of the <code>FacebookAds</code> one.</p>
+<p><code>php
+use MyNamespace\Object\AdAccount;
+$adaccount = (new AdAccount($id))-&gt;read();
+echo $adaccount-&gt;name;</code></p>
+<h3 id="requesting-connections-without-helper-methods">Requesting Connections Without Helper Methods<a name="generic_connections"></a></h3>
+<p>As detailed in the <a href="#connections">Connections</a> section, we provide helper methods to request objects relative to an object. However, in some cases these methods may not have been implemented, or if you have extended our based objects as in the example of <a href="#default_fields">defining default fields to read</a>, calling a connection helper method on a base object will return objects of the \FacebookAds namespace type. </p>
+<p>In this case, you can use our generic connection methods to retrieve the correct type of object for any class extending <code>AbstractCrudObject</code>. To enable this, we provide two methods, <code>getOneByConnection</code> and <code>getManyByConnection</code> or which the latter is the most commonly used.</p>
+<p>```php
+use FacebookAds\Object\AdAccount;</p>
+<p>// Ad in your namespace which you have used to extend the
+// FacebookAds\Object\Ad class
+use MyNamespace\Object\Ad;</p>
+<p>$account = new AdAccount($id);
+$my_adaccount_objects = $account-&gt;getManyByConnection(
+  Ad::className(), $fields = array(...), $params = array(...));</p>
+<p>```</p>
+</body></html>
