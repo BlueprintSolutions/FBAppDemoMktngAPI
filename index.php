@@ -7,10 +7,16 @@ use FacebookAds\Api;
 
 session_start();
 
-if (!isset($_SESSION['config']['access_token'])) { 
+//echo '<strong>ACCESS TOKEN</strong>: ' . $_SESSION['config']['access_token'];
+//echo "<br>";
+
+if (is_null($_SESSION['config']['access_token'])) { 
 	if (!isset($_GET["code"])) {
 		header("Location: access.php");
 	}else{
+		//echo '<strong>AUTHORIZATION CODE</strong>: ' . $_GET["code"];
+		//echo "<br>";
+
 		$_SESSION['config']['authorization_code'] = $_GET["code"];
 		$code = $_GET["code"];
 		echo '<strong>CODE</strong>: ' . $_SESSION['config']['authorization_code'];	
@@ -39,9 +45,8 @@ if (!isset($_SESSION['config']['access_token'])) {
 	echo "<br>";
 	echo '<strong>GRAPH VERSION</strong>: ' . $_SESSION['config']['default_graph_version'];
 	echo "<br>";
-}
 
-if (isset($_SESSION['config']['authorization_code']) && isset($_SESSION['config']['app_id']) && isset($_SESSION['config']['login_url']) && isset($_SESSION['config']['app_secret'])){
+	$_SESSION['facebook_access_token'] = $_SESSION['config']['access_token'];
 }
 
 // Add after echo "You are logged in "

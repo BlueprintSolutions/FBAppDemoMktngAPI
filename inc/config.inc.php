@@ -11,7 +11,7 @@
 		  'app_id' => '525243791549096',
 		  'app_secret' => '57bcb17d93cca10a5e600c0558aacfbf',
 		  'authorization_code' => '',
-		  'access_token' => '',
+		  'access_token' => null,
 		  'default_graph_version' => 'v4.0',
 		  'business_id' => '',
 		  'act_id' => '',

@@ -1,6 +1,7 @@
 {
   "require": {
     "facebook/graph-sdk" : "~5.0",
-    "facebook/php-ads-sdk": "2.8.*"
+    "facebook/php-ads-sdk": "2.8.*",
+	"facebook/php-business-sdk": "4.*"
   }
 }

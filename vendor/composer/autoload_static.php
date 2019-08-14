@@ -26,6 +26,7 @@ class ComposerStaticInit8a10d2c551494092d094f22f36671db4
         'FacebookAds\\' => 
         array (
             0 => __DIR__ . '/..' . '/facebook/php-ads-sdk/src/FacebookAds',
+            1 => __DIR__ . '/..' . '/facebook/php-business-sdk/src/FacebookAds',
         ),
     );
 

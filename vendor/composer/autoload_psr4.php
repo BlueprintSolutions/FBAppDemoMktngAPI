@@ -7,5 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Facebook\\' => array($vendorDir . '/facebook/graph-sdk/src/Facebook'),
-    'FacebookAds\\' => array($vendorDir . '/facebook/php-ads-sdk/src/FacebookAds'),
+    'FacebookAds\\' => array($vendorDir . '/facebook/php-ads-sdk/src/FacebookAds', $vendorDir . '/facebook/php-business-sdk/src/FacebookAds'),
 );

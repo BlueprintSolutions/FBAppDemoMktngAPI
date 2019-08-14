@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9a7e34d760b1fdf7262de7726d9ddd17",
+    "content-hash": "4d253290226454f065038881da5c7b84",
     "packages": [
         {
             "name": "facebook/graph-sdk",
@@ -100,6 +100,43 @@
                 "sdk"
             ],
             "time": "2017-04-13T20:43:54+00:00"
+        },
+        {
+            "name": "facebook/php-business-sdk",
+            "version": "4.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/facebook/facebook-php-business-sdk.git",
+                "reference": "2f3263a6e61592ea519fce418b1b91440befb750"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/facebook/facebook-php-business-sdk/zipball/2f3263a6e61592ea519fce418b1b91440befb750",
+                "reference": "2f3263a6e61592ea519fce418b1b91440befb750",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.6",
+                "symfony/finder": "~2.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "FacebookAds\\": "src/FacebookAds/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "description": "PHP SDK for Facebook Business",
+            "homepage": "https://developers.facebook.com/",
+            "keywords": [
+                "ads",
+                "business",
+                "facebook",
+                "instagram",
+                "page",
+                "sdk"
+            ],
+            "time": "2019-08-08T00:04:18+00:00"
         }
     ],
     "packages-dev": [],
