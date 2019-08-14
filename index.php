@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/inc/config.inc';
+include __DIR__ . '/inc/config.inc';
 
 // Add to header of your file
 use FacebookAds\Api;
@@ -14,24 +14,12 @@ if (!isset($_GET["code"])) {
 	$code = $_GET["code"];
 	echo('<strong>CODE</strong>: ' . $code . '<BR>');	
 	
-	echo 'REQUEST_URI: ' . $_SERVER['REQUEST_URI'];
+	echo '<strong>CLIENT ID</strong>: ' . $_SESSION['config']['app_id'];
 	echo "<br>";
-	echo 'PHP_SELF: ' . $_SERVER['PHP_SELF'];
+	echo '<strong>REDIRECT URI</strong>: ' . $_SESSION['config']['login_url'];
 	echo "<br>";
-	echo 'SERVER_NAME: ' . $_SERVER['SERVER_NAME'];
+	echo '<strong>CLIENT SECRET</strong>: ' . $_SESSION['config']['app_secret'];
 	echo "<br>";
-	echo 'HTTP_HOST: ' . $_SERVER['HTTP_HOST'];
-	echo "<br>";
-	echo 'HTTP_REFERER: ' . $_SERVER['HTTP_REFERER'];
-	echo "<br>";
-	echo 'HTTP_USER_AGENT: ' . $_SERVER['HTTP_USER_AGENT'];
-	echo "<br>";
-	echo 'SCRIPT_NAME: ' . $_SERVER['SCRIPT_NAME'];
-	
-	echo "<br>";
-	echo "<br>";
-	$url =  "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
-	echo $url;
 }
 
 
@@ -40,8 +28,8 @@ if (!isset($_GET["code"])) {
 
 // Initialize a new Session and instantiate an API object
 Api::init(
-  '525243791549096', // App ID
-  '57bcb17d93cca10a5e600c0558aacfbf',
+  $_SESSION['config']['app_id'], // App ID
+  $_SESSION['config']['app_secret'],
   $_SESSION['facebook_access_token'] // Your user access token
 );
 

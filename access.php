@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/inc/config.inc';
+include __DIR__ . '/inc/config.inc';
 
 use Facebook\Facebook;
 use Facebook\Exceptions\FacebookResponseException;
@@ -8,11 +8,12 @@ use Facebook\Exceptions\FacebookSDKException;
 
 // Init PHP Sessions
 session_start();
+$_SESSION['config'] = config();
 
 $fb = new Facebook([
-  'app_id' => '525243791549096',
-  'app_secret' => '57bcb17d93cca10a5e600c0558aacfbf',
-  'default_graph_version' => 'v4.0',
+  'app_id' => $_SESSION['config']['app_id'],
+  'app_secret' => $_SESSION['config']['app_secret'],
+  'default_graph_version' => $_SESSION['config']['default_graph_version'],
 ]);
 
 $helper = $fb->getRedirectLoginHelper();
@@ -36,24 +37,11 @@ if (!$_SESSION['facebook_access_token']) {
   }
 }
 
-// Program to display URL of current page. 
-  
-if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') 
-    $link = "https"; 
-else
-    $link = "http"; 
-  
-// Here append the common URL characters. 
-$link .= "://"; 
-  
-// Append the host(domain name, ip) to the URL. 
-$link .= $_SERVER['HTTP_HOST']; 
-
 if ($_SESSION['facebook_access_token']) {
   echo "You are logged in!";
 } else {
   $permissions = ['ads_management', 'ads_read', 'manage_pages', 'read_insights'];
-  $loginUrl = $helper->getLoginUrl($link . '/fbappdemomkt', $permissions);
+  $loginUrl = $helper->getLoginUrl($_SESSION['config']['login_url'], $permissions);
   echo '<a href="' . $loginUrl . '">Log in with Facebook</a>';
 }
 ?>
