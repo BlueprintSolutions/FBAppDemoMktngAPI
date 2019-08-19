@@ -47,4 +47,5 @@ if ($_SESSION['facebook_access_token']) {
   $loginUrl = $helper->getLoginUrl($_SESSION['config']['login_url'], $permissions);
   echo '<a href="' . $loginUrl . '">Log in with Facebook</a>';
 }
+
 ?>

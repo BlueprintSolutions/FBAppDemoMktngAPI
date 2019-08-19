@@ -3,20 +3,13 @@ require_once __DIR__ . '/inc/global.inc.php';
 
 // Add to header of your file
 use FacebookAds\Api;
-//use FacebookAds\Object\AdUser;
 
 session_start();
-
-//echo '<strong>ACCESS TOKEN</strong>: ' . $_SESSION['config']['access_token'];
-//echo "<br>";
 
 if (is_null($_SESSION['config']['access_token'])) { 
 	if (!isset($_GET["code"])) {
 		header("Location: access.php");
 	}else{
-		//echo '<strong>AUTHORIZATION CODE</strong>: ' . $_GET["code"];
-		//echo "<br>";
-
 		$_SESSION['config']['authorization_code'] = $_GET["code"];
 		$code = $_GET["code"];
 		echo '<strong>CODE</strong>: ' . $_SESSION['config']['authorization_code'];	
@@ -31,12 +24,14 @@ if (is_null($_SESSION['config']['access_token'])) {
 		echo "<br>";
 		
 		$access = get_access_token($_SESSION['config']['graph_base_domain'], $_SESSION['config']['default_graph_version'], $_SESSION['config']['app_id'], $_SESSION['config']['login_url'], $_SESSION['config']['app_secret'], $_SESSION['config']['authorization_code']);
-		
+		$_SESSION['config']['access_token_array'] = $access;
 		//var_dump($access);
 		$_SESSION['facebook_access_token'] = $access['access_token'];
 		$_SESSION['config']['access_token'] = $access['access_token'];
 	}
 } else {
+	echo '<strong>CODE</strong>: ' . $_SESSION['config']['authorization_code'];	
+	echo "<br>";
 	echo '<strong>CLIENT ID</strong>: ' . $_SESSION['config']['app_id'];
 	echo "<br>";
 	echo '<strong>REDIRECT URI</strong>: ' . $_SESSION['config']['login_url'];
@@ -60,10 +55,17 @@ Api::init(
 
 echo "<br>";
 echo '<strong>ACCESS TOKEN</strong>: ' . $_SESSION['config']['access_token'];
+echo "<br>";
+echo "<br>";
+echo '<strong>ACCESS TOKEN (ARRAY)</strong>: ';
+var_dump($_SESSION['config']['access_token_array']);
 
-// Add after Api::init()
-//$me = new AdUser('me');
-//$my_adaccount = $me->getAdAccounts()->current();
+use FacebookAds\Object\AdAccount;
 
-//print_r($my_adaccount->getData());
+$account = (new AdAccount($_SESSION['config']['app_id']))->getSelf();
+echo "<br>";
+echo "<br>";
+echo '<strong>GET FACEBOOK ADS ACCOUNT</strong>: ';
+var_dump($account);
+
 ?>
