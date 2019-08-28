@@ -3,6 +3,15 @@ require_once __DIR__ . '/inc/global.inc.php';
 
 // Add to header of your file
 use FacebookAds\Api;
+use FacebookAds\Http\Exception\RequestException;
+use FacebookAds\Object\Campaign;
+use FacebookAds\Object\Fields\CampaignFields;
+use FacebookAds\Object\Values\CampaignObjectiveValues;
+
+use FacebookAds\Object\AdSet;
+use FacebookAds\Object\AdAccount;
+use FacebookAds\Object\Fields\AdAccountFields;
+use FacebookAds\Object\Fields\AdSetFields;
 
 session_start();
 
@@ -52,6 +61,9 @@ Api::init(
   $_SESSION['config']['app_secret'],
   $_SESSION['facebook_access_token'] // Your user access token
 );
+$api = Api::instance();
+//use FacebookAds\Logger\CurlLogger;
+//$api->setLogger(new CurlLogger());
 
 echo "<br>";
 echo '<strong>ACCESS TOKEN</strong>: ' . $_SESSION['config']['access_token'];
@@ -60,12 +72,27 @@ echo "<br>";
 echo '<strong>ACCESS TOKEN (ARRAY)</strong>: ';
 var_dump($_SESSION['config']['access_token_array']);
 
-use FacebookAds\Object\AdAccount;
+$fields = array(
+  AdAccountFields::ID,
+  AdAccountFields::NAME,
+ );
+
+//$account = (new AdAccount($_SESSION['config']['app_id']))->getSelf($fields);
 
 $account = (new AdAccount($_SESSION['config']['app_id']))->getSelf();
+
 echo "<br>";
 echo "<br>";
 echo '<strong>GET FACEBOOK ADS ACCOUNT</strong>: ';
 var_dump($account);
+echo "<br>";
+echo "<br>";
+echo '<strong>ACCOUNT NAME</strong>: ' . $account->name;
+
+$account2 = (new AdAccount($_SESSION['config']['app_id']))->read($fields);
+
+echo "<br>";
+echo "\n<strong>Using this account</strong>: ";
+echo $account2->id."\n";
 
 ?>

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d253290226454f065038881da5c7b84",
+    "content-hash": "6c28cf1d8c6fd1c15be0d81745d761bf",
     "packages": [
         {
             "name": "facebook/graph-sdk",
@@ -103,16 +103,16 @@
         },
         {
             "name": "facebook/php-business-sdk",
-            "version": "4.0.1",
+            "version": "4.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/facebook/facebook-php-business-sdk.git",
-                "reference": "2f3263a6e61592ea519fce418b1b91440befb750"
+                "reference": "741a0273e8e810a3ad7461461f02b58c77596044"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/facebook/facebook-php-business-sdk/zipball/2f3263a6e61592ea519fce418b1b91440befb750",
-                "reference": "2f3263a6e61592ea519fce418b1b91440befb750",
+                "url": "https://api.github.com/repos/facebook/facebook-php-business-sdk/zipball/741a0273e8e810a3ad7461461f02b58c77596044",
+                "reference": "741a0273e8e810a3ad7461461f02b58c77596044",
                 "shasum": ""
             },
             "require-dev": {
@@ -136,7 +136,7 @@
                 "page",
                 "sdk"
             ],
-            "time": "2019-08-08T00:04:18+00:00"
+            "time": "2019-08-21T00:19:49+00:00"
         }
     ],
     "packages-dev": [],

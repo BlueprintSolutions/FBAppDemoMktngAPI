@@ -1,7 +1,15 @@
 {
-  "require": {
-    "facebook/graph-sdk" : "~5.0",
-    "facebook/php-ads-sdk": "2.8.*",
-	"facebook/php-business-sdk": "4.*"
-  }
+	"name": "bpsg/facebook_app_demo",
+	"description": "Creates a Facebook app for ads management",
+    "authors": [
+        {
+            "name": "Aldwin Galapon",
+            "email": "aldwin.galapon@blueprintsolutionsgroup.com"
+        }
+    ],	
+	"require": {
+		"facebook/graph-sdk" : "~5.0",
+		"facebook/php-ads-sdk": "2.8.*",
+		"facebook/php-business-sdk": "4.*"
+	}
 }

@@ -1,4 +1,8 @@
 <?php
+	class settings{
+		
+	}
+	
 	function config(){
 		if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') 
 			$link = "https"; 
