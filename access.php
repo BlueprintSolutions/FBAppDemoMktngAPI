@@ -16,11 +16,14 @@ if (!isset($_SESSION['facebook_access_token'])) {
 	$_SESSION['config'] = config();
 }
 
-$fb = new Facebook([
-  'app_id' => $_SESSION['config']['app_id'],
-  'app_secret' => $_SESSION['config']['app_secret'],
-  'default_graph_version' => $_SESSION['config']['default_graph_version'],
-]);
+//$fb = new Facebook([
+//  'app_id' => $_SESSION['config']['app_id'],
+//  'app_secret' => $_SESSION['config']['app_secret'],
+//  'default_graph_version' => $_SESSION['config']['default_graph_version'],
+//]);
+
+$_SESSION['config']['fb_api'] = initialize_fb($_SESSION['config']['app_id'], $_SESSION['config']['app_secret'], $_SESSION['config']['default_graph_version']);
+$fb = $_SESSION['config']['fb_api'];
 
 $helper = $fb->getRedirectLoginHelper();
 

@@ -10,6 +10,7 @@
 	"require": {
 		"facebook/graph-sdk" : "~5.0",
 		"facebook/php-ads-sdk": "2.8.*",
-		"facebook/php-business-sdk": "4.*"
+		"facebook/php-business-sdk": "4.*",
+		"nesbot/carbon": "^1.27"
 	}
 }

@@ -2,6 +2,10 @@
 require_once __DIR__ . '/inc/global.inc.php';
 
 // Add to header of your file
+use Facebook\Facebook;
+use Facebook\Exceptions\FacebookResponseException;
+use Facebook\Exceptions\FacebookSDKException;
+
 use FacebookAds\Api;
 use FacebookAds\Http\Exception\RequestException;
 use FacebookAds\Object\Campaign;
@@ -12,6 +16,8 @@ use FacebookAds\Object\AdSet;
 use FacebookAds\Object\AdAccount;
 use FacebookAds\Object\Fields\AdAccountFields;
 use FacebookAds\Object\Fields\AdSetFields;
+
+use FacebookAds\Object\Values\InsightsOperators;
 
 session_start();
 
@@ -84,16 +90,53 @@ $account = (new AdAccount($_SESSION['config']['app_id']))->getSelf();
 
 echo "<br>";
 echo "<br>";
-echo '<strong>GET FACEBOOK ADS ACCOUNT</strong>: ';
+echo '<strong>ADS ACCOUNT using ' .$_SESSION['config']['app_id'] .' (Application ID)</strong>: ';
 var_dump($account);
 echo "<br>";
 echo "<br>";
-echo '<strong>ACCOUNT NAME</strong>: ' . $account->name;
+echo '<strong>APPLICATION NAME</strong>: ' . $account->name;
 
-$account2 = (new AdAccount($_SESSION['config']['app_id']))->read($fields);
+//$account2 = (new AdAccount($_SESSION['config']['app_id']))->read($fields);
+
+//echo "<br>";
+//echo "\n<strong>Using this Application ID</strong>: ";
+//echo $account2->id."\n";
+
+$adAccount = new AdAccount($_SESSION['config']['ad_act']);
+echo "<br>";
+echo "<br>";
+echo '<strong>ADS ACCOUNT using ' . $_SESSION['config']['ad_act'] . ' (act_[Account ID])</strong>: ';
+var_dump($adAccount);
 
 echo "<br>";
-echo "\n<strong>Using this account</strong>: ";
-echo $account2->id."\n";
+echo "<br>";
+echo '<strong>APP SECRET PROOF</strong>: ' . get_appsecret_proof($_SESSION['facebook_access_token'], $_SESSION['config']['app_secret']);
+
+$fb = $_SESSION['config']['fb_api'];
+
+try {
+  // Returns a `Facebook\FacebookResponse` object
+  $response = $fb->get(
+    '/' . $_SESSION['config']['ad_act'] . '/campaigns',
+    $_SESSION['facebook_access_token']
+  );
+} catch(Facebook\Exceptions\FacebookResponseException $e) {
+  echo 'Graph returned an error: ' . $e->getMessage();
+  exit;
+} catch(Facebook\Exceptions\FacebookSDKException $e) {
+  echo 'Facebook SDK returned an error: ' . $e->getMessage();
+  exit;
+}
+$getGraphEdge = $response->getGraphEdge();
+
+echo "<br>";
+echo "<br>";
+echo '<strong>LIST CAMPAIGNS</strong>:';
+echo "<br>";
+var_dump($response->getBody());
+//echo "<br>";
+//echo "<br>";
+//var_dump($getGraphEdge);
+
 
 ?>

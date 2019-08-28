@@ -1,8 +1,23 @@
 <?php
+	use Facebook\Facebook;
+	use Facebook\Exceptions\FacebookResponseException;
+	use Facebook\Exceptions\FacebookSDKException;
 	use FacebookAds\Api;
+	use FacebookAds\Http\Exception\RequestException;
 	use FacebookAds\Object\Campaign;
 	use FacebookAds\Object\Fields\CampaignFields;
 	use FacebookAds\Object\Values\CampaignObjectiveValues;
+
+	use FacebookAds\Object\AdSet;
+	use FacebookAds\Object\AdAccount;
+	use FacebookAds\Object\Fields\AdAccountFields;
+	use FacebookAds\Object\Fields\AdSetFields;
+
+	use FacebookAds\Object\Values\InsightsOperators;
+	
+	function initialize_fb($app_id, $app_secret, $graph_version){
+		return (new Facebook(['app_id' => $app_id, 'app_secret' => $app_secret, 'default_graph_version' => $graph_version,]));
+	}
 	
 	function get_access_token($graph_base_domain, $graph_version, $client_id, $redirect_uri, $client_secret, $code){
 		$ch = curl_init();
@@ -38,3 +53,7 @@
 			echo 'Error Code: ' .$e->getCode() ."<br/>";
 		}
 	}
+
+	function get_appsecret_proof($app_secret, $access_token){
+		return $appsecret_proof= hash_hmac('sha256', $access_token, $app_secret); 	
+	}	

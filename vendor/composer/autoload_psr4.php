@@ -6,6 +6,9 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
+    'Symfony\\Component\\Translation\\' => array($vendorDir . '/symfony/translation'),
     'Facebook\\' => array($vendorDir . '/facebook/graph-sdk/src/Facebook'),
     'FacebookAds\\' => array($vendorDir . '/facebook/php-ads-sdk/src/FacebookAds', $vendorDir . '/facebook/php-business-sdk/src/FacebookAds'),
+    '' => array($vendorDir . '/nesbot/carbon/src'),
 );
