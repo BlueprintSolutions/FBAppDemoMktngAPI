@@ -1,4 +1,9 @@
 <?php
+	use FacebookAds\Api;
+	use FacebookAds\Object\Campaign;
+	use FacebookAds\Object\Fields\CampaignFields;
+	use FacebookAds\Object\Values\CampaignObjectiveValues;
+	
 	function get_access_token($graph_base_domain, $graph_version, $client_id, $redirect_uri, $client_secret, $code){
 		$ch = curl_init();
 
@@ -16,4 +21,20 @@
 		curl_close($ch);
 		
 		return json_decode( $response, TRUE );
+	}
+	
+	function initialize_api($app_id, $app_secret, $access_token){
+		try{
+			Api::init(
+				$app_id, // App ID
+				$app_secret,
+				$access_token // Your user access token
+			);
+			
+			return Api::instance();		
+		}
+		catch (Exception $e) {
+			echo 'Error message: ' .$e->getMessage() ."\n" . "<br/>";
+			echo 'Error Code: ' .$e->getCode() ."<br/>";
+		}
 	}

@@ -56,12 +56,13 @@ if (is_null($_SESSION['config']['access_token'])) {
 // Add after echo "You are logged in "
 
 // Initialize a new Session and instantiate an API object
-Api::init(
-  $_SESSION['config']['app_id'], // App ID
-  $_SESSION['config']['app_secret'],
-  $_SESSION['facebook_access_token'] // Your user access token
-);
-$api = Api::instance();
+//Api::init(
+//  $_SESSION['config']['app_id'], // App ID
+//  $_SESSION['config']['app_secret'],
+//  $_SESSION['facebook_access_token'] // Your user access token
+//);
+//$api = Api::instance();
+$api = initialize_api($_SESSION['config']['app_id'], $_SESSION['config']['app_secret'], $_SESSION['facebook_access_token']);
 //use FacebookAds\Logger\CurlLogger;
 //$api->setLogger(new CurlLogger());
 

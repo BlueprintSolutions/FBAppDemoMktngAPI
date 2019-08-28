@@ -41,7 +41,7 @@ if (!$_SESSION['facebook_access_token']) {
 
 if ($_SESSION['facebook_access_token']) {
 	//echo "You are logged in!";
-	header("Location: index.php");
+	header("Location: index.php?message=You are logged in");
 } else {
   $permissions = ['ads_management', 'ads_read', 'manage_pages', 'read_insights'];
   $loginUrl = $helper->getLoginUrl($_SESSION['config']['login_url'], $permissions);
