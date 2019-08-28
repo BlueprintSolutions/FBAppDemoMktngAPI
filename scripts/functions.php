@@ -14,6 +14,8 @@
 	use FacebookAds\Object\Fields\AdSetFields;
 
 	use FacebookAds\Object\Values\InsightsOperators;
+
+	use FacebookAds\Logger\CurlLogger;	
 	
 	function initialize_fb($app_id, $app_secret, $graph_version){
 		return (new Facebook(['app_id' => $app_id, 'app_secret' => $app_secret, 'default_graph_version' => $graph_version,]));
@@ -57,3 +59,49 @@
 	function get_appsecret_proof($app_secret, $access_token){
 		return $appsecret_proof= hash_hmac('sha256', $access_token, $app_secret); 	
 	}	
+	
+	function get_campaigns($ad_act, $access_token, $fb_api){
+		$fb = $fb_api;
+
+		try {
+		  // Returns a `Facebook\FacebookResponse` object
+		  $response = $fb->get(
+			'/' . $ad_act . '/campaigns',
+			$access_token
+		  );
+		  
+		  return $response;
+		} catch(Facebook\Exceptions\FacebookResponseException $e) {
+		  echo 'Graph returned an error: ' . $e->getMessage();
+		  exit;
+		} catch(Facebook\Exceptions\FacebookSDKException $e) {
+		  echo 'Facebook SDK returned an error: ' . $e->getMessage();
+		  exit;
+		}
+		$getGraphEdge = $response->getGraphEdge();		
+	}
+	
+	function add_campaign($ad_act, $access_token, $fb_api, $campaign_name){
+		$fb = $fb_api;
+		
+		try {
+		  // Returns a `Facebook\FacebookResponse` object
+		  $response = $fb->post(
+			'/' . $ad_act . '/campaigns',
+			array (
+			  'name' => $campaign_name,
+			  'objective' => 'LINK_CLICKS',
+			  'status' => 'PAUSED',
+			),
+			$access_token
+		  );
+		  
+		  return $response;
+		} catch(Facebook\Exceptions\FacebookResponseException $e) {
+		  echo 'Graph returned an error: ' . $e->getMessage();
+		  exit;
+		} catch(Facebook\Exceptions\FacebookSDKException $e) {
+		  echo 'Facebook SDK returned an error: ' . $e->getMessage();
+		  exit;
+		}		
+	}

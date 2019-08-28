@@ -5,6 +5,8 @@ use Facebook\Facebook;
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 
+use FacebookAds\Logger\CurlLogger;
+
 // Init PHP Sessions
 session_start();
 

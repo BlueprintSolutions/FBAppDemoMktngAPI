@@ -19,6 +19,8 @@ use FacebookAds\Object\Fields\AdSetFields;
 
 use FacebookAds\Object\Values\InsightsOperators;
 
+use FacebookAds\Logger\CurlLogger;
+
 session_start();
 
 if (is_null($_SESSION['config']['access_token'])) { 
@@ -86,7 +88,7 @@ $fields = array(
 
 //$account = (new AdAccount($_SESSION['config']['app_id']))->getSelf($fields);
 
-$account = (new AdAccount($_SESSION['config']['app_id']))->getSelf();
+/* $account = (new AdAccount($_SESSION['config']['app_id']))->getSelf();
 
 echo "<br>";
 echo "<br>";
@@ -94,7 +96,7 @@ echo '<strong>ADS ACCOUNT using ' .$_SESSION['config']['app_id'] .' (Application
 var_dump($account);
 echo "<br>";
 echo "<br>";
-echo '<strong>APPLICATION NAME</strong>: ' . $account->name;
+echo '<strong>APPLICATION NAME</strong>: ' . $account->name; */
 
 //$account2 = (new AdAccount($_SESSION['config']['app_id']))->read($fields);
 
@@ -102,17 +104,17 @@ echo '<strong>APPLICATION NAME</strong>: ' . $account->name;
 //echo "\n<strong>Using this Application ID</strong>: ";
 //echo $account2->id."\n";
 
-$adAccount = new AdAccount($_SESSION['config']['ad_act']);
+/* $adAccount = new AdAccount($_SESSION['config']['ad_act']);
 echo "<br>";
 echo "<br>";
 echo '<strong>ADS ACCOUNT using ' . $_SESSION['config']['ad_act'] . ' (act_[Account ID])</strong>: ';
-var_dump($adAccount);
+var_dump($adAccount); */
 
 echo "<br>";
 echo "<br>";
 echo '<strong>APP SECRET PROOF</strong>: ' . get_appsecret_proof($_SESSION['facebook_access_token'], $_SESSION['config']['app_secret']);
 
-$fb = $_SESSION['config']['fb_api'];
+/* $fb = $_SESSION['config']['fb_api'];
 
 try {
   // Returns a `Facebook\FacebookResponse` object
@@ -128,15 +130,36 @@ try {
   exit;
 }
 $getGraphEdge = $response->getGraphEdge();
+ */
+?>
+
+<form action="" name="new campaign" method="post">
+	<label>Campaign Name: <input type="text" name="campaign_name" id="campaign_name"></label>
+	<input type="submit" value="Submit">
+</form>
+
+<?php  
+
+if (isset($_POST["campaign_name"]) && trim($_POST["campaign_name"]) != "") {
+    echo "Yes, campaign name is set";
+	echo "<br>";
+	echo "<br>";
+	$campaign = add_campaign($_SESSION['config']['ad_act'], $_SESSION['facebook_access_token'], $_SESSION['config']['fb_api'], $_POST["campaign_name"]);
+	var_dump($campaign->getBody());
+} else {    
+    echo "No, campaign name is not set";
+}
+
+
+$campaigns = get_campaigns($_SESSION['config']['ad_act'], $_SESSION['facebook_access_token'], $_SESSION['config']['fb_api']);
 
 echo "<br>";
 echo "<br>";
 echo '<strong>LIST CAMPAIGNS</strong>:';
 echo "<br>";
-var_dump($response->getBody());
+var_dump($campaigns->getBody());
 //echo "<br>";
 //echo "<br>";
 //var_dump($getGraphEdge);
-
 
 ?>
