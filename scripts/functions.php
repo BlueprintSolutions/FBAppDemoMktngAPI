@@ -60,13 +60,16 @@
 		return $appsecret_proof= hash_hmac('sha256', $access_token, $app_secret); 	
 	}	
 	
-	function get_campaigns($ad_act, $access_token, $fb_api){
-		$fb = $fb_api;
-
+	function get_campaigns($ad_act, $access_token, $fb_api, $fields){
 		try {
+			$fb = $fb_api;
+			
+			if($fields!=""){
+				$fields = '?fields=' . $fields;
+			}
 		  // Returns a `Facebook\FacebookResponse` object
 		  $response = $fb->get(
-			'/' . $ad_act . '/campaigns',
+			'/' . $ad_act . '/campaigns' . $fields . '',
 			$access_token
 		  );
 		  

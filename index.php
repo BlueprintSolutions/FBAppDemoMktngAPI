@@ -156,7 +156,7 @@ if (isset($_POST["campaign_name"]) && trim($_POST["campaign_name"]) != "") {
 }
 
 
-$campaigns = get_campaigns($_SESSION['config']['ad_act'], $_SESSION['facebook_access_token'], $_SESSION['config']['fb_api']);
+$campaigns = get_campaigns($_SESSION['config']['ad_act'], $_SESSION['facebook_access_token'], $_SESSION['config']['fb_api'], 'id, name, objective, status, start_time, stop_time, spend_cap');
 
 echo "<br>";
 echo "<br>";
@@ -171,17 +171,18 @@ var_dump($data);
 //	echo $campaign['id'];
 //}
 //var_dump($campaigns);
-$someArray = json_decode($data, true);
+$campaignArray = json_decode($data, true);
 echo "<br>";
 echo "<br>";
-var_dump($someArray);
+var_dump($campaignArray);
 
 echo "<br>";
 echo "<table><tr><th>Campaign ID</th><th>Campaign Name</th><th>Objective</th><th>Status</th></tr>";
-for ($i = 0; $i < count($someArray['data']); $i++) {
-	$campaign = new Campaign($someArray['data'][$i]['id'], $_SESSION['config']['ad_act']);
-    //echo "<tr><td>". $someArray['data'][$i]['id'] . "</td></tr>";
-	echo "<tr><td>". $campaign->{CampaignFields::ID} . "</td><td>". $campaign->{CampaignFields::NAME} . "</td><td>". $campaign->{CampaignFields::OBJECTIVE} . "</td><td>". $campaign->{CampaignFields::STATUS} . "</td></tr>";
+for ($i = 0; $i < count($campaignArray['data']); $i++) {
+	//$campaign = new Campaign($campaignArray['data'][$i]['id'], $_SESSION['config']['ad_act']);
+    //echo "<tr><td>". $campaignArray['data'][$i]['id'] . "</td></tr>";
+	//echo "<tr><td>". $campaign->{CampaignFields::ID} . "</td><td>". $campaign->{CampaignFields::NAME} . "</td><td>". $campaign->{CampaignFields::OBJECTIVE} . "</td><td>". $campaign->{CampaignFields::STATUS} . "</td></tr>";
+	echo "<tr><td>". $campaignArray['data'][$i]['id'] . "</td><td>". $campaignArray['data'][$i]['name'] . "</td><td>". $campaignArray['data'][$i]['objective'] . "</td><td>". $campaignArray['data'][$i]['status'] . "</td></tr>";
 }
 echo "</table>";
 ?>
