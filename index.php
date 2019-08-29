@@ -74,12 +74,17 @@ $api = initialize_api($_SESSION['config']['app_id'], $_SESSION['config']['app_se
 //use FacebookAds\Logger\CurlLogger;
 //$api->setLogger(new CurlLogger());
 
+//echo "<br>";
+//echo '<strong>ACCESS TOKEN</strong>: ' . $_SESSION['config']['access_token'];
+//echo "<br>";
+//echo '<strong>ACCESS TOKEN (ARRAY)</strong>: ';
+//var_dump($_SESSION['config']['access_token_array']);
 echo "<br>";
-echo '<strong>ACCESS TOKEN</strong>: ' . $_SESSION['config']['access_token'];
+echo '<strong>ACCESS TOKEN</strong>: ' . $_SESSION['config']['access_token_array']['access_token'];
 echo "<br>";
+echo '<strong>TOKEN TYPE</strong>: ' . $_SESSION['config']['access_token_array']['token_type'];
 echo "<br>";
-echo '<strong>ACCESS TOKEN (ARRAY)</strong>: ';
-var_dump($_SESSION['config']['access_token_array']);
+echo '<strong>EXPIRES IN</strong>: ' . $_SESSION['config']['access_token_array']['expires_in'];
 
 $fields = array(
   AdAccountFields::ID,
@@ -135,7 +140,7 @@ $getGraphEdge = $response->getGraphEdge();
 
 <form action="" name="new campaign" method="post">
 	<label>Campaign Name: <input type="text" name="campaign_name" id="campaign_name"></label>
-	<input type="submit" value="Submit">
+	<input type="submit" value="Create Campaign">
 </form>
 
 <?php  
@@ -157,9 +162,26 @@ echo "<br>";
 echo "<br>";
 echo '<strong>LIST CAMPAIGNS</strong>:';
 echo "<br>";
-var_dump($campaigns->getBody());
+$data = $campaigns->getBody();
+var_dump($data);
 //echo "<br>";
 //echo "<br>";
 //var_dump($getGraphEdge);
+//foreach ($data['data'] as $campaign) {
+//	echo $campaign['id'];
+//}
+//var_dump($campaigns);
+$someArray = json_decode($data, true);
+echo "<br>";
+echo "<br>";
+var_dump($someArray);
 
+echo "<br>";
+echo "<table><tr><th>Campaign ID</th><th>Campaign Name</th><th>Objective</th><th>Status</th></tr>";
+for ($i = 0; $i < count($someArray['data']); $i++) {
+	$campaign = new Campaign($someArray['data'][$i]['id'], $_SESSION['config']['ad_act']);
+    //echo "<tr><td>". $someArray['data'][$i]['id'] . "</td></tr>";
+	echo "<tr><td>". $campaign->{CampaignFields::ID} . "</td><td>". $campaign->{CampaignFields::NAME} . "</td><td>". $campaign->{CampaignFields::OBJECTIVE} . "</td><td>". $campaign->{CampaignFields::STATUS} . "</td></tr>";
+}
+echo "</table>";
 ?>
