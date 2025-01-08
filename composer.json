@@ -11,6 +11,6 @@
 		"facebook/graph-sdk" : "~5.0",
 		"facebook/php-ads-sdk": "2.8.*",
 		"facebook/php-business-sdk": "4.*",
-		"nesbot/carbon": "^1.27"
+		"nesbot/carbon": "^2.72"
 	}
 }
